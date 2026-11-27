@@ -5,6 +5,9 @@ const T=window.TOPICS, byId={};
 T.forEach(t=>{byId[t.id]=t;t.next=[];});
 T.forEach(t=>t.pre.forEach(p=>byId[p].next.push(t.id)));
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// 数式中の "<" が HTML タグとして解釈されないようにする（<br> だけは残す）
+const tx=s=>String(s).replace(/<(?!br>)/g,'&lt;');
+const steps=list=>list.map(s=>`<li><div class="sx">${tx(s)}</div></li>`).join('');
 const col=t=>`var(--${STRANDS[t.strand][0]})`;
 const stageName=t=>STAGES[t.stage].join(' ');
 
@@ -14,7 +17,7 @@ try{done=new Set(JSON.parse(localStorage.getItem('mathmap-done')||'[]'));}catch(
 const saveDone=()=>{try{localStorage.setItem('mathmap-done',JSON.stringify([...done]));}catch(e){}};
 
 /* ---- 地図のレイアウト ---- */
-const LW=96,CW=176,HH=44,RH=132,NW=152,NH=34,GAP=8;
+const LW=108,CW=176,HH=44,RH=132,NW=152,NH=34,GAP=8;
 const W=LW+CW*STAGES.length, H=HH+RH*STRANDS.length;
 const cells={},pos={};
 T.forEach(t=>{(cells[t.stage+'-'+t.strand]??=[]).push(t);});
@@ -86,26 +89,26 @@ function render(t){
   const anc=ancestors(t.id).filter(x=>!t.pre.includes(x));
   const probs=(window.PROBLEMS||{})[t.id]||[];
   const LV={'基本':'b','応用':'a','複合':'c','発展':'h'};
-  const probHtml=probs.map((q,i)=>`<div class="ex"><p class="plabel"><span class="lv lv-${LV[q.lv]}">${q.lv}</span><span class="pno">問${i+1}</span>${q.with?`<span class="uses">組み合わせる単元</span>${q.with.map(chip).join('')}`:''}</p><p class="q">${q.q}</p>
-    <details><summary>解き方を見る</summary><ol>${q.steps.map(s=>`<li>${s}</li>`).join('')}</ol><p class="ans">答え　${q.a}</p></details></div>`).join('');
+  const probHtml=probs.map((q,i)=>`<div class="ex"><p class="plabel"><span class="lv lv-${LV[q.lv]}">${q.lv}</span><span class="pno">問${i+1}</span>${q.with?`<span class="uses">組み合わせる単元</span>${q.with.map(chip).join('')}`:''}</p><p class="q">${tx(q.q)}</p>
+    <details><summary>解き方を見る</summary><ol>${steps(q.steps)}</ol><p class="ans">答え　${tx(q.a)}</p></details></div>`).join('');
   detail.innerHTML=`
   <header class="d-head">
     <p class="crumb">${STRANDS[t.strand][1]} ／ ${stageName(t)}</p>
     <h2>${esc(t.title)}</h2>
-    <p class="lead">${t.lead}</p>
+    <p class="lead">${tx(t.lead)}</p>
     <label class="done-l" for="done-box"><input type="checkbox" id="done-box"${done.has(t.id)?' checked':''}>学習済みにする</label>
   </header>
   <div class="cols">
     <div class="main">
-      <section class="sec"><h3>要点</h3><dl class="points">${t.points.map(q=>`<div><dt>${q[0]}</dt><dd>${q[1]}</dd></div>`).join('')}</dl></section>
+      <section class="sec"><h3>要点</h3><dl class="points">${t.points.map(q=>`<div><dt>${tx(q[0])}</dt><dd>${tx(q[1])}</dd></div>`).join('')}</dl></section>
       ${t.demo?'<section class="sec"><h3>動かして確かめる</h3><div id="demo-host"></div></section>':''}
-      <section class="sec"><h3>例題</h3><div class="ex"><p class="q">${t.ex.q}</p>
-        <details><summary>解き方を見る</summary><ol>${t.ex.steps.map(s=>`<li>${s}</li>`).join('')}</ol><p class="ans">答え　${t.ex.a}</p></details></div></section>
-      <section class="sec"><h3>つまずきやすい所</h3><p class="trap">${t.trap}</p></section>
+      <section class="sec"><h3>例題</h3><div class="ex"><p class="q">${tx(t.ex.q)}</p>
+        <details><summary>解き方を見る</summary><ol>${steps(t.ex.steps)}</ol><p class="ans">答え　${tx(t.ex.a)}</p></details></div></section>
+      <section class="sec"><h3>つまずきやすい所</h3><p class="trap">${tx(t.trap)}</p></section>
       ${probs.length?`<section class="sec"><h3>練習問題（${probs.length}問）</h3><p class="note">基本 → 応用 → 複合（ほかの単元と組み合わせる）→ 発展 の順に難しくなります。</p><div class="probs">${probHtml}</div></section>`:''}
     </div>
     <aside class="side">
-      <section class="sec"><h3>なぜ学ぶか</h3><p>${t.why}</p></section>
+      <section class="sec"><h3>なぜ学ぶか</h3><p>${tx(t.why)}</p></section>
       <section class="sec"><h3>前提（先に学ぶ）</h3>${chips(t.pre)}</section>
       <section class="sec"><h3>発展（この先で使う）</h3>${chips(t.next)}</section>
       ${anc.length?`<section class="sec"><h3>さらにさかのぼると</h3>${chips(anc)}</section>`:''}
