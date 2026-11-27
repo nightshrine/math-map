@@ -44,7 +44,7 @@ p{margin:0}
 .col-h.hs-first{border-left:1px dashed var(--line)}
 .row{position:absolute;left:0;right:0;border-bottom:1px solid var(--line)}
 .row:last-of-type{border-bottom:0}
-.row span{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:76px;font-weight:700;font-size:13px;line-height:1.35;color:var(--c)}
+.row span{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:90px;font-weight:700;font-size:13px;line-height:1.35;color:var(--c);white-space:nowrap}
 .node{position:absolute;width:152px;height:34px;display:flex;align-items:center;gap:8px;padding:0 10px;
   background:var(--surface);border:1.5px solid var(--line);border-radius:17px;color:var(--ink);
   font:500 12.5px/1 var(--f-body);cursor:pointer;text-align:left;white-space:nowrap;transition:opacity .15s}
@@ -84,12 +84,13 @@ p{margin:0}
 .points{margin:0;display:flex;flex-direction:column}
 .points div{display:grid;grid-template-columns:9.5em minmax(0,1fr);gap:4px 16px;padding:10px 0;border-top:1px solid var(--line)}
 .points dt{font-weight:700}
-.points dd{margin:0;overflow-x:auto}
+.points dd{margin:0;overflow-x:auto;overflow-y:hidden;padding-block:3px}
 .ex{background:var(--sunk);border-radius:8px;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
-.ex .q{font-weight:500;overflow-x:auto}
+.ex .q{font-weight:500;overflow-x:auto;overflow-y:hidden;padding-block:3px}
 .ex summary{cursor:pointer;color:var(--c);font-weight:700;font-size:14px;width:fit-content}
 .ex ol{margin:10px 0 0;padding-left:1.4em;display:flex;flex-direction:column;gap:6px}
-.ex li{overflow-x:auto}
+.ex li{min-width:0}
+.sx{overflow-x:auto;overflow-y:hidden;padding-block:3px}
 .ex .ans{margin-top:10px;font-weight:700}
 .trap{border-left:3px solid var(--c);padding-left:14px}
 .probs{display:flex;flex-direction:column;gap:12px}
