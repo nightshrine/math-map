@@ -4,13 +4,14 @@ const $=s=>document.querySelector(s);
 const STRANDS=['alg','fn','geo','dat'];
 // 星域 = 科目。単元 id の接頭辞で決まる
 const REGIONS=[['m1-','中学1年','中学'],['m2-','中学2年','中学'],['m3-','中学3年','中学'],['h1-','数学I','高校'],['hA-','数学A','高校'],['h2-','数学II','高校'],['hB-','数学B','高校'],['h3-','数学III','高校'],['hC-','数学C','高校']];
-const NAME={'h2-bibun':'微分法と積分法'};   // 教科書の章名に合わせる上書き
+// 星図に出す名前と題の上書き [星図の名前, 題]。数学II と数学III の微積分を見分けられるように科目を付ける
+const NAME={'h2-bibun':['微分法と積分法（数II）','微分法と積分法'],'h3-bibun':['微分法（数III）'],'h3-sekibun':['積分法（数III）'],'h3-kyokugen':['極限（数III）']};
 const tx=s=>String(s).replace(/<(?!br>|b>|\/b>)/g,'&lt;');   // 数式中の < をタグと誤解させない
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---- 星座（章）と星（項） ---- */
-const chapters=TOPICS.map(t=>({id:t.id,name:NAME[t.id]||t.short,title:NAME[t.id]||t.title,strand:t.strand,
+const chapters=TOPICS.map(t=>({id:t.id,name:(NAME[t.id]||[])[0]||t.short,title:(NAME[t.id]||[])[1]||t.title,strand:t.strand,
   region:REGIONS.findIndex(r=>t.id.startsWith(r[0])),pre:t.pre,next:[],topic:t,stars:[]}));
 const chById={};chapters.forEach(c=>chById[c.id]=c);
 chapters.forEach(c=>c.pre.forEach(p=>chById[p].next.push(c.id)));
@@ -67,7 +68,7 @@ function build(){
     s+=`<path class="edge" data-a="${p}" data-b="${c.id}" d="M${a.x.toFixed(1)},${a.y.toFixed(1)} Q${(mx-dy*.12*sg).toFixed(1)},${(my+dx*.12*sg).toFixed(1)} ${b.x.toFixed(1)},${b.y.toFixed(1)}" style="stroke:var(--${STRANDS[chById[p].strand]})"/>`;}));
   s+=deco;
   chapters.forEach(c=>{const p=pos[c.id],n=c.stars.length,big=n>1,k=STRANDS[c.strand];let sats='';
-    for(let i=0;i<n-1&&big;i++){const a=i/(n-1)*Math.PI*2-Math.PI/2;sats+=`<circle class="sat" r="2.3" cx="${(Math.cos(a)*22).toFixed(1)}" cy="${(Math.sin(a)*22).toFixed(1)}"/>`;}
+    const ns=Math.min(n-1,8);for(let i=0;i<ns&&big;i++){const a=i/ns*Math.PI*2-Math.PI/2;sats+=`<circle class="sat" r="2.3" cx="${(Math.cos(a)*22).toFixed(1)}" cy="${(Math.sin(a)*22).toFixed(1)}"/>`;}
     s+=`<g class="ch" data-id="${c.id}" transform="translate(${p.x.toFixed(1)},${p.y.toFixed(1)})" style="--c:var(--${k})" tabindex="0" role="button" aria-label="${esc(c.title)}"><g class="inv">`+
       `<circle class="halo" r="${big?40:27}" fill="url(#g-${k})" style="animation-delay:${(-(jit(c.id,3)+1)*2.2).toFixed(2)}s"/>`+
       `<circle class="ring-bg" r="13"/><circle class="ring" r="13" transform="rotate(-90)"/><circle class="core" r="${big?7:5.5}"/>${sats}`+

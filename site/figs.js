@@ -24,7 +24,7 @@ function plot(range,w=340,h=250){
     poly(p,st){s+=`<polygon points="${p.map(q=>f1(sx(q[0]))+','+f1(sy(q[1]))).join(' ')}" ${st}/>`;return o;},
     under(f,a,b,st,g){const p=[];for(let i=0;i<=60;i++){const x=a+(b-a)*i/60;p.push([x,f(x)]);}
       if(g)for(let i=60;i>=0;i--){const x=a+(b-a)*i/60;p.push([x,g(x)]);}else{p.push([b,0]);p.push([a,0]);}return o.poly(p,st);},
-    txt(x,y,t,st=''){s+=`<text x="${f1(sx(x))}" y="${f1(sy(y))}" font-size="11" font-family="var(--f-mono)" fill="var(--muted)" ${st}>${t}</text>`;return o;},
+    txt(x,y,t,st=''){s+=`<text x="${f1(sx(x))}" y="${f1(sy(y))}" font-size="11" font-family="var(--f-mono)" ${/\bfill=/.test(st)?'':'fill="var(--muted)"'} ${st}>${t}</text>`;return o;},
     out:()=>s};
   return o;
 }
@@ -154,4 +154,20 @@ FIGS.legacy=(host,d)=>mk(host,{alt:'関数のグラフ',
     if(d.tangent){const a=v[d.tangent],e=1e-4,m=(d.f(a+e,v)-d.f(a-e,v))/(2*e),fa=d.f(a,v),x0=d.range[0],x1=d.range[1];p.seg(x0,fa+m*(x0-a),x1,fa+m*(x1-a),'stroke="var(--ink)" stroke-width="1.4"').dot(a,fa,'var(--ink)');}
     (d.pts?d.pts(v):[]).forEach(q=>p.dot(q[0],q[1],'var(--gold)'));
     return {svg:p.out(),read:MM.esc(d.cap(v))+(d.note?`<br><span class="note">${MM.esc(d.note)}</span>`:'')};}});
+
+/* 座標軸のない図（図形の証明など）を px で描くための部品。viewBox は 340 × 高さ */
+function draw(){let s='';const INK='stroke="var(--ink)" stroke-width="1.6" fill="none"';
+  const o={line(x1,y1,x2,y2,st=INK){s+=`<line x1="${f1(x1)}" y1="${f1(y1)}" x2="${f1(x2)}" y2="${f1(y2)}" ${st}/>`;return o;},
+    poly(p,st=INK){s+=`<polygon points="${p.map(q=>f1(q[0])+','+f1(q[1])).join(' ')}" ${st}/>`;return o;},
+    circle(cx,cy,r,st=INK){s+=`<circle cx="${f1(cx)}" cy="${f1(cy)}" r="${f1(r)}" ${st}/>`;return o;},
+    path(d,st=INK){s+=`<path d="${d}" ${st}/>`;return o;},
+    dot(x,y,fill='var(--ink)',r=4){s+=`<circle cx="${f1(x)}" cy="${f1(y)}" r="${r}" fill="${fill}"/>`;return o;},
+    // 角の印：中心 (cx,cy)、半径 r、角度 a0 から a1（度。右向きが 0、反時計回りが正）
+    angle(cx,cy,r,a0,a1,st='stroke="var(--gold)" stroke-width="1.6" fill="none"'){const t=a=>a*Math.PI/180,x0=cx+r*Math.cos(t(a0)),y0=cy-r*Math.sin(t(a0)),x1=cx+r*Math.cos(t(a1)),y1=cy-r*Math.sin(t(a1));
+      s+=`<path d="M${f1(x0)},${f1(y0)} A${r},${r} 0 ${Math.abs(a1-a0)>180?1:0} ${a1>a0?0:1} ${f1(x1)},${f1(y1)}" ${st}/>`;return o;},
+    text(x,y,t,st=''){s+=`<text x="${f1(x)}" y="${f1(y)}" font-size="12" font-family="var(--f-mono)" ${/\bfill=/.test(st)?'':'fill="var(--ink)"'} ${/text-anchor=/.test(st)?'':'text-anchor="middle"'} ${st}>${t}</text>`;return o;},
+    raw(x){s+=x;return o;},out:()=>s};
+  return o;}
+FIGS.plot=FIGS.legacy;
+window.FIG={plot,draw,n,sg,C,GOLD,DASH,mk:(host,cfg)=>mk(host,cfg)};
 })();
